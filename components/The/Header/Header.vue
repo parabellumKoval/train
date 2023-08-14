@@ -17,7 +17,7 @@
     <div class="subheader">
       <div class="background">
         <nuxt-img
-          src="/header.jpg"
+          src="/images/header.jpg"
           class="background-img"
         />
       </div>

@@ -34,9 +34,9 @@ export default defineNuxtConfig({
           desktop: 1919,
         },
         format: ['avif'],
-        dir: 'public/images',
+        dir: 'public',
         vercel: {
-          dirname: 'public/images'
+          dirname: 'public'
         },
       }
     ],
