@@ -1,5 +1,6 @@
 <script setup> 
 import moment from 'moment'
+import momentDurationFormatSetup from 'moment-duration-format'
 
 import json_data_stations from '~/json/stations.json'
 import json_data_ways from '~/json/ways.json'
@@ -15,7 +16,8 @@ const form = ref({
   from: 'A1',
   to: 'A2',
   vagons: 1,
-  date: null
+  date: null,
+  perPage: 20
 })
 
 const setup = {
@@ -29,6 +31,7 @@ const sorting = ref({
   type: 'number'
 })
 
+momentDurationFormatSetup(moment)
 // COMPUTED
 const amount = computed(() => {
   return results.value.length
@@ -53,12 +56,15 @@ const tableData = computed(() => {
     const Ecap = 0.647446 * (2072 * form.value.vagons + Eek1m)
     const Ezag = Math.round((Ecap + 2072 * form.value.vagons + Eek1m) * 2)/2
     const Pnm = Math.round(1.1 * Ezag * 2)/2
+    const Dnm = Math.round(((1.1 * Ezag) - Ezag) * 2)/2
 
     localResults.push({
       id: i + 1,
       Ezag: Ezag,
       Pnm: Pnm,
-      travelTime: moment.utc(moment.duration(travelTime, 'minutes').asMilliseconds()).format('HHч mmм'),
+      Dnm: Dnm,
+      //travelTime: moment.utc(moment.duration(travelTime, 'minutes').asMilliseconds()).format('HHч mmм'),
+      travelTime: moment.duration(travelTime, 'minutes').format('HHч mmм'),
       travelMinutes: travelTime,
       arrivalTime: arrivalTime,
       arrival: arrival,
@@ -74,7 +80,7 @@ const tableData = computed(() => {
   else if (sorting.value.type === 'date')
     sorted = sortDate(localResults, sorting.value.dir, sorting.value.name)
 
-  return sorted.slice(0, 20)
+  return sorted.slice(0, form.value.perPage)
 })
 
 // METHODS
@@ -156,7 +162,7 @@ const calculateHandler = async () => {
   isLoading.value = true
   await getVariants(form.value.from, form.value.to).then((data) => {
     let sorted = sortNumbers(data, true, 'distance')
-    results.value = sorted.slice(0, 20)
+    results.value = sorted.slice(0, form.value.perPage)
   }).finally(() => {
     isLoading.value = false
   })
@@ -195,6 +201,10 @@ const calculateHandler = async () => {
             <div class="mb-3">
               <label for="date" class="form-label">{{ t('form.date') }}</label>
               <input v-model="form.date" type="datetime-local" class="form-control" id="date" required>
+            </div>
+            <div class="mb-3">
+              <label for="perPage" class="form-label">{{ t('form.perPage') }}</label>
+              <input v-model="form.perPage" type="number" class="form-control" id="perPage" min="1" step="1" max="100">
             </div>
 
             <button @click="calculateHandler" type="button" class="btn btn-primary">{{ t('btn.calc') }}</button>
@@ -238,6 +248,9 @@ const calculateHandler = async () => {
                   <button-sort :title="t('table.Pnm')" :is-active="sorting.name === 'Pnm'" :dir="sorting.dir" @sort="sortHandler('Pnm')"></button-sort>
                 </th>
                 <th>
+                  <button-sort :title="t('table.Dnm')" :is-active="sorting.name === 'Dnm'" :dir="sorting.dir" @sort="sortHandler('Dnm')"></button-sort>
+                </th>
+                <th>
                   <button-sort :title="t('table.distance')" :is-active="sorting.name === 'distance'" :dir="sorting.dir" @sort="sortHandler('distance')"></button-sort>
                 </th>
               </tr>
@@ -250,6 +263,7 @@ const calculateHandler = async () => {
                 <td>{{ way.arrivalTime }}</td>
                 <td>{{ $n(way.Ezag, 'currency') }}</td>
                 <td>{{ $n(way.Pnm, 'currency') }}</td>
+                <td>{{ $n(way.Dnm, 'currency') }}</td>
                 <td>{{ $n(way.distance, 'distance') }}</td>
               </tr>
             </tbody>
