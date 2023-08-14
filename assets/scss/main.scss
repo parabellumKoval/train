@@ -1,0 +1,153 @@
+@import './reset';
+@import './mixins';
+@import './vars';
+
+/* General */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+
+  pointer-events: none;
+  touch-action: pan-left, pan-right, pan-up, pan-down, pan-x, pan-y;
+
+
+  @include _desktop {
+    pointer-events: all;
+    touch-action: auto;
+  }
+}
+
+input,
+button,
+a,
+textarea,
+label,
+*[clickable] { 
+  touch-action: manipulation;
+  pointer-events: auto; 
+}
+
+*[scrollable],
+*[pointer] {
+  pointer-events: auto;
+
+  * {
+    pointer-events: auto;
+  }
+}
+
+html {
+  overflow-x: initial;
+  font-size: 14px;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+  line-height: 100%;
+  color: $color-text-2;
+  scroll-snap-type: y mandatory;
+  height: 100%;
+
+  @include _desktop {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-primary;
+
+    &:hover {
+      background: darken($color-primary, 10%)
+    }
+  }
+}
+
+body {
+  @include _tablet {
+    scroll-snap-type: none;
+    max-height: initial;
+  }
+}
+
+a {
+  color: $color-text;
+}
+
+.container {
+  padding: 0 15px;
+  min-width: 320px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-x: hidden;
+
+  @include _tablet {
+    padding: 0 35px;
+    overflow-x: initial;
+  }
+
+  @include _desktop {
+    max-width: 1440px;
+  }
+}
+
+.pseudo-full {
+  margin-left: -35px;
+  margin-right: -35px;
+  padding: 0 35px;
+  width: calc(100% + 70px);
+}
+
+.hide-scroll {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+.caption {
+  margin-bottom: 40px;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 33px;
+}
+
+.sticky {
+  @include _desktop {
+    position: sticky;
+    top: 80px; 
+  }
+}
+
+img {
+  &.lazy {
+    opacity: 1;
+    transition: opacity $speed;
+
+    &.loaded {
+      opacity: 1;
+    }
+  }
+}
+
+
+// COMMON PAGE
+.page {
+  &-inner {
+
+  }
+}

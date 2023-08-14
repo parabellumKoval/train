@@ -1,0 +1,19 @@
+@import '~/node_modules/bootstrap/scss/_functions.scss';
+@import '~/node_modules/bootstrap/scss/_variables.scss';
+
+.table {
+  tr {
+    td, th {
+      padding: 10px 5px;
+    }
+
+    th {
+      padding-top: 0;
+      white-space: nowrap;
+
+      .th-label {
+        height: 20px;
+      }
+    }
+  }
+}

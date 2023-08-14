@@ -1,0 +1,46 @@
+// COLORS
+$color-bg: #fff;
+$color-bg-2: #FBFBFB;
+$color-bg-2-2: #F5F5F5;
+$color-bg-3: #EEE;
+
+$color-primary: #0099D0;
+$color-primary-25: #BFE5F3;
+$color-primary-7: #EDF8FC;
+$color-primary-hover: #28b1e1;
+$color-secondary: #FFE000;
+
+$color-text: #000000;
+$color-text-2: #333;
+$color-text-3: #656565;
+
+$color-gray: #DDDDDD;
+$color-gray-2: #CCCCCC;
+
+$color-facebook: #1877F2;
+$color-instagram: #C13584;
+$color-tiktok: #000000;
+
+$color-whatsup: #25D366;
+$color-viber: #8F5DB7;
+$color-telegram: #0088CC;
+
+$color-red: #D11540;
+$color-red-25: #F3C5CF;
+$color-red-7: #FCEFF2;
+$color-green: #98DF7E;
+
+// GRADIENTS
+$yellow-grad: linear-gradient(128.03deg, #FFE000 0%, #FFF4A3 100%);
+$blue-grad: linear-gradient(180deg, #0099D0 0%, #79DCFF 100%);
+$blue-grad-bg: linear-gradient(145.79deg, #FBFBFB 0.57%, #ECFAFF 98.26%);
+
+// ANIMATION
+$speed-fast: .15s;
+$speed: .3s;
+$speed-slow: .5s;
+
+$filter-color-white: invert(100%) sepia(100%) saturate(0%) hue-rotate(291deg) brightness(101%) contrast(105%);
+
+//
+$radius: 6px;

@@ -1,0 +1,19 @@
+// MOBILE FIRST
+
+@mixin _tablet {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+@mixin _desktop {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin _large-desktop {
+  @media (min-width: 1440px) {
+    @content;
+  }
+}

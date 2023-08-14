@@ -1,0 +1,139 @@
+[
+  {
+    "points": ["A1", "A2"],
+    "dist": 75
+  },{
+    "points": ["A2", "A3"],
+    "dist": 120
+  },{
+    "points": ["A3", "A4"],
+    "dist": 85
+  },{
+    "points": ["A4", "A5"],
+    "dist": 90
+  },
+  
+  {
+    "points": ["A1", "A6"],
+    "dist": 110
+  },{
+    "points": ["A2", "A7"],
+    "dist": 60
+  },{
+    "points": ["A3", "A8"],
+    "dist": 50
+  },{
+    "points": ["A4","A9"],
+    "dist": 75
+  },{
+    "points": ["A5","A10"],
+    "dist": 85
+  },
+
+  {
+    "points": ["A6", "A7"],
+    "dist": 125
+  },{
+    "points": ["A7", "A8"],
+    "dist": 90
+  },{
+    "points": ["A8","A9"],
+    "dist": 55
+  },{
+    "points": ["A9", "A10"],
+    "dist": 95
+  },
+  
+  {
+    "points": ["A6", "A11"],
+    "dist": 125
+  },{
+    "points": ["A7", "A12"],
+    "dist": 95
+  },{
+    "points": ["A8", "A13"],
+    "dist": 65
+  },{
+    "points": ["A9","A14"],
+    "dist": 90
+  },{
+    "points": ["A10","A15"],
+    "dist": 120
+  },
+
+  {
+    "points": ["A11", "A12"],
+    "dist": 130
+  },{
+    "points": ["A12", "A13"],
+    "dist": 105
+  },{
+    "points": ["A13","A14"],
+    "dist": 70
+  },{
+    "points": ["A14", "A15"],
+    "dist": 105
+  },
+  
+  {
+    "points": ["A11", "A16"],
+    "dist": 115
+  },{
+    "points": ["A12", "A17"],
+    "dist": 105
+  },{
+    "points": ["A13", "A18"],
+    "dist": 75
+  },{
+    "points": ["A14","A19"],
+    "dist": 110
+  },{
+    "points": ["A15","A20"],
+    "dist": 115
+  },
+
+  {
+    "points": ["A16", "A17"],
+    "dist": 135
+  },{
+    "points": ["A17", "A18"],
+    "dist": 95
+  },{
+    "points": ["A18","A19"],
+    "dist": 85
+  },{
+    "points": ["A19", "A20"],
+    "dist": 100
+  },
+  
+  {
+    "points": ["A16", "A21"],
+    "dist": 75
+  },{
+    "points": ["A17", "A22"],
+    "dist": 90
+  },{
+    "points": ["A18", "A23"],
+    "dist": 70
+  },{
+    "points": ["A19","A24"],
+    "dist": 115
+  },{
+    "points": ["A20","A25"],
+    "dist": 110
+  },
+
+  {
+    "points": ["A21", "A22"],
+    "dist": 120
+  },{
+    "points": ["A22", "A23"],
+    "dist": 85
+  },{
+    "points": ["A23","A24"],
+    "dist": 80
+  },{
+    "points": ["A24", "A25"],
+    "dist": 85
+  }
+]

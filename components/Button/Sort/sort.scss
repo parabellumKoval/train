@@ -1,0 +1,32 @@
+@import '~/node_modules/bootstrap/scss/_functions.scss';
+@import '~/node_modules/bootstrap/scss/_variables.scss';
+// @import '~/node_modules/bootstrap/scss/bootstrap.scss';
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 700;
+  white-space: nowrap;
+  color: $primary;
+  border-bottom: 2px dashed #fff;
+  transition: border-bottom .3s;
+
+  &:hover {
+    border-bottom: 2px dashed $primary;
+  }
+
+  .icon-css {
+    margin-left: 5px;
+  }
+
+  .spacer {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
+  }
+}
