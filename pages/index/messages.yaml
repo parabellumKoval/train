@@ -13,6 +13,7 @@ uk:
   table:
     distance: "Дистанція"
     Pnm: "Дохід"
+    Eek1m: "Вартість п."
     Ezag: "Витрати"
     Dnm: "Прибуток"
     travelTime: "Час у дорозі"

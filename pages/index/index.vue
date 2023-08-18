@@ -21,7 +21,7 @@ const form = ref({
 })
 
 const setup = {
-  e: 16.165,
+  e: 371.8066,
   v: 50
 }
 
@@ -60,6 +60,7 @@ const tableData = computed(() => {
 
     localResults.push({
       id: i + 1,
+      Eek1m: Eek1m,
       Ezag: Ezag,
       Pnm: Pnm,
       Dnm: Dnm,
@@ -120,12 +121,10 @@ const getVariants = (from, finish, total = {points:[], distance: 0}, ways = []) 
     })
 
     if(!availableWays.length) {
-      //console.log('no ways', from, total)
       return []
     }
 
     availableWays.forEach(way => {
-      //const sum = {points: [], distance: 0}
       const newFrom = way.points.find(item => item !== from)
     
       const newTotal = {
@@ -133,16 +132,10 @@ const getVariants = (from, finish, total = {points:[], distance: 0}, ways = []) 
         distance: total.distance + way.dist
       }
 
-      //console.log('newTotal',newTotal,)
-      // total.points.push(newFrom)
-      // total.distance += way.dist
-
       if(newFrom !== finish){
-        //console.log(from + ' >>> ' + newFrom)
         const deeper = getVariants(newFrom, finish, newTotal, ways)
       }else {
         ways.push(newTotal)
-        //console.log(from + ' >>> ' + newFrom + ' = FINISH', ways)
       }
     })
 
@@ -151,7 +144,6 @@ const getVariants = (from, finish, total = {points:[], distance: 0}, ways = []) 
 }
 
 const sortHandler = (name, type = 'number') => {
-  console.log('sortHandler', name,type)
   
   sorting.value.dir = !sorting.value.dir
   sorting.value.name = name
@@ -242,6 +234,9 @@ const calculateHandler = async () => {
                   ></button-sort>
                 </th>
                 <th>
+                  <button-sort :title="t('table.Eek1m')" :is-active="sorting.name === 'Eek1m'" :dir="sorting.dir" @sort="sortHandler('Eek1m')"></button-sort>
+                </th>
+                <th>
                   <button-sort :title="t('table.Ezag')" :is-active="sorting.name === 'Ezag'" :dir="sorting.dir" @sort="sortHandler('Ezag')"></button-sort>
                 </th>
                 <th>
@@ -261,6 +256,7 @@ const calculateHandler = async () => {
                 <td>{{ way.points.join(', ') }}</td>
                 <td>{{ way.travelTime }}</td>
                 <td>{{ way.arrivalTime }}</td>
+                <td>{{ $n(way.Eek1m, 'currency') }}</td>
                 <td>{{ $n(way.Ezag, 'currency') }}</td>
                 <td>{{ $n(way.Pnm, 'currency') }}</td>
                 <td>{{ $n(way.Dnm, 'currency') }}</td>
