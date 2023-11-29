@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.1",
+    "lodash.union": "^4.6.0",
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2"
   },

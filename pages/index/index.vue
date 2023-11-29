@@ -3,12 +3,10 @@ import moment from 'moment'
 import momentDurationFormatSetup from 'moment-duration-format'
 
 import json_data_stations from '~/json/stations.json'
-import json_data_ways from '~/json/ways.json'
 
 const {t} = useI18n()
 
 const stations = json_data_stations
-const allWays = json_data_ways
 
 const isLoading = ref(false)
 const results = ref([])
@@ -104,44 +102,7 @@ const sortNumbers = (list, dir, name) => {
   })
 } 
 
-const getVariants = (from, finish, total = {points:[], distance: 0}, ways = []) => {
-  return new Promise((resolve) => {
 
-    if(!total.points.length) {
-      total.points.push(from)
-    }
-
-    const availableWays = allWays.filter(way => {
-      if(way.points.includes(from)) {
-        const to = way.points.find(item => item !== from)
-        return !total.points.includes(to)
-      }else {
-        return false
-      }
-    })
-
-    if(!availableWays.length) {
-      return []
-    }
-
-    availableWays.forEach(way => {
-      const newFrom = way.points.find(item => item !== from)
-    
-      const newTotal = {
-        points: total.points.concat([newFrom]),
-        distance: total.distance + way.dist
-      }
-
-      if(newFrom !== finish){
-        const deeper = getVariants(newFrom, finish, newTotal, ways)
-      }else {
-        ways.push(newTotal)
-      }
-    })
-
-    resolve(ways);
-  })
-}
 
 const sortHandler = (name, type = 'number') => {
   
@@ -152,7 +113,7 @@ const sortHandler = (name, type = 'number') => {
 
 const calculateHandler = async () => {
   isLoading.value = true
-  await getVariants(form.value.from, form.value.to).then((data) => {
+  await useWay().getVariants(form.value.from, form.value.to).then((data) => {
     let sorted = sortNumbers(data, true, 'distance')
     results.value = sorted.slice(0, form.value.perPage)
   }).finally(() => {
@@ -168,6 +129,8 @@ const calculateHandler = async () => {
 <template>
   <div>
     <div class="container">
+      <h2 class="mt-5">{{ t('label.h1') }}</h2>
+
       <div class="row justify-content-center mt-5">
         
         <div class="col-md-2 col-sm-12">

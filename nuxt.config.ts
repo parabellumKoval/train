@@ -5,6 +5,17 @@ export default defineNuxtConfig({
     "bootstrap/dist/css/bootstrap.min.css",
     '@/assets/scss/main.scss'
   ],
+  // app: {
+  //   head: {
+  //     script: [
+  //       {
+  //         // defer: true,
+  //         // async: true,
+  //         src: `@/node_modules/bootstrap/dist/js/bootstrap.js`
+  //       }
+  //     ]
+  //   }
+  // },
   modules: [
     [
       'nuxt-icon',

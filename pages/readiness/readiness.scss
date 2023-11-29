@@ -1,0 +1,88 @@
+@import '~/node_modules/bootstrap/scss/_functions.scss';
+@import '~/node_modules/bootstrap/scss/_variables.scss';
+
+
+.speed-wrapper {
+  display: flex;
+  align-items: center;
+  grid-gap: 5px;
+
+  & > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 33px;
+    height: 33px;
+    border-radius: 6px;
+    background: #eee;
+    cursor: pointer;
+    transition: background .3s;
+
+    &:hover {
+      background: #ddd;
+    }
+
+    &.active {
+      background: $primary;
+      color: #fff;
+    }
+  }
+}
+
+.form-row {
+  background: #fff;
+  transition: background .3s;
+
+  // &:hover {
+  //   background: #ffffd2;
+  // }
+
+  &.selected {
+    background: #ffffd2;
+  }
+}
+
+.custom-table {
+  font-size: 13px;
+
+  th,td {
+    padding: 2px 5px;
+    border: 1px solid #ddd;
+  }
+
+  &-header {
+    background: #eee;
+    font-size: 8px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  tr {
+    &.last {
+      border-bottom: 2px solid #333;
+    }
+  }
+
+  td {
+    &.smaller {
+      font-size: 10px;
+    }
+
+    &.nowrap {
+      white-space: nowrap;
+    }
+  }
+
+  &.large {
+    font-size: 16px;
+
+
+    .custom-table-header {
+      font-size: 12px;
+    }
+
+    th,td {
+      padding: 10px 10px;
+    }
+  }
+}

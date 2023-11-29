@@ -126,13 +126,6 @@ a {
   line-height: 33px;
 }
 
-.sticky {
-  @include _desktop {
-    position: sticky;
-    top: 80px; 
-  }
-}
-
 img {
   &.lazy {
     opacity: 1;
@@ -146,8 +139,13 @@ img {
 
 
 // COMMON PAGE
+.main {
+  padding-bottom: 100px;
+}
+
 .page {
   &-inner {
 
   }
 }
+

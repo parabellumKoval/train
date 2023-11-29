@@ -11,15 +11,32 @@ header {
   width: 100%;
   z-index: 100;
   border-bottom: 2px solid $primary;
-  background: $blue-100;
+  background: #eee;
 
   .logo {
     display: flex;
     align-items: center;
-    color: $primary;
+    grid-gap: 10px;
 
     .icon-css {
       margin-right: 5px;
+    }
+
+    .name {
+      color: $primary;
+      font-weight: 500;
+      text-transform: uppercase;
+      line-height: 17px;
+      text-align: center;
+
+      &-1 {
+        font-size: 25px;
+        font-weight: 600;
+      }
+
+      &-2 {
+        font-size: 12px;
+      }
     }
   }
 }
@@ -57,4 +74,27 @@ header {
     z-index: 10;
     background: rgba(0,0,0,0.5);
   }
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  grid-gap: 15px;
+  height: 100%;
+
+  &-link {
+    display: inline-block;
+    padding: 3px 0;
+    font-size: 16px;
+    border-bottom: 2px solid transparent;
+    transition: color .3s, border .3s;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+
+.router-link-active {
+  border-bottom: 2px solid $primary;
 }

@@ -1,3 +1,6 @@
+<script setup>
+</script>
+
 <style src="./header.scss" lang="scss" scoped />
 
 <template>
@@ -5,11 +8,25 @@
     <header>
       <div class="container">
         <div class="row">
-          <div class="col-sm-12 col-md-6">
+          <div class="col-sm-12 col-md-3">
             <div class="logo">
-              <IconCSS name="lucide:train-track" size="24" class="icon-css"></IconCSS>
-              {{ $t('app.name') }}
+              <Icon name="noto-v1:bullet-train" size="50" class="icon-css"></Icon>
+              <div class="name">
+                <div class="name-1">ЗАЛІЗНИЧНІ</div>
+                <div class="name-2">ВАНТАЖОПЕРЕВЕЗЕННЯ</div>
+                <!-- {{ $t('app.name') }} -->
+              </div>
             </div>
+          </div>
+          <div class="col-sm-12 col-md-9">
+            <ul class="menu">
+              <li class="menu-item">
+                <NuxtLink :to="localePath('/')" class="menu-link">Розрахунок маршрутів</NuxtLink>
+              </li>
+              <li class="menu-item">
+                <NuxtLink :to="localePath('/readiness')" class="menu-link">Розрахунок перевезення вантажів</NuxtLink>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
