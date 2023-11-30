@@ -87,7 +87,7 @@ const priceCalc = (cargo, group) => {
   let distsJoinsSum = 0
      
   for(let p = 0; p < cargo.dists.length; p++) {
-    const point = cargo.points[p]
+    const point = cargo.points[p+1]
     const dist = cargo.dists[p]
 
     const pointDitale = group.pointDitales.find((item) => {
@@ -565,16 +565,16 @@ readinessData.value = readiness
           
           <table v-if="!loading.active && trains.length > 0" class="custom-table">
             <tr class="custom-table-header">
-              <th>Номер поїзду</th>
-              <th>Філіал відправлення</th>
+              <th>Порядковий номер поїзда</th>
+              <th>Станція відправлення</th>
               <th colspan="2">Дата та час відправлення поїзда</th>
-              <th>Філія причеплення</th>
-              <th colspan="2">Дата та час відправлення поїзда зі станції відчеплення</th>
-              <th>Проміжні філії</th>
-              <th colspan="2">Філія призначення та філія призначення причепної філії</th>
-              <th colspan="2">Дата та час прибуття поїзда на філію призначення \ причіпної групи</th>
-              <th>Вартість проїзду</th>
-              <th>Кількість вагонів основна група та причіпна група</th>
+              <th>Станція причеплення групи вагонів</th>
+              <th colspan="2">Дата та час відправлення поїзда зі станції причеплення групи вагонів</th>
+              <th>Станція через, які проходить маршрут поїзда</th>
+              <th>Станція призначення</th>
+              <th colspan="2">Дата та час прибуття поїзда на станцію призначення</th>
+              <th>Вартість перевезення вантажів вантажовідправника</th>
+              <th>Кількість вагонів з вантажем вантажовідправника</th>
               <th>Відстань перевезення</th>
               <th>Час в дорозі</th>
             </tr>
@@ -589,9 +589,8 @@ readinessData.value = readiness
                 <td >–</td>
                 <td >{{ moment(train.cargoList[0].date).format("DD.MM.YYYY") }}</td>
                 <td >{{ moment(train.cargoList[0].date).format("HH:mm") }}</td>
-                <td class="smaller">{{ train.cargoList[0].points.slice(1, train.cargoList[0].points.length - 1).join(', ') }}</td>
+                <td>{{ train.cargoList[0].points.slice(1, train.cargoList[0].points.length - 1).join(', ') }}</td>
                 <td >{{ train.cargoList[0].to}}</td>
-                <td >{{ '–' }}</td>
                 <td >{{ moment(train.cargoList[0].finishDateTotal).format("DD.MM.YYYY") }}</td>
                 <td >{{ moment(train.cargoList[0].finishDateTotal).format("HH:mm") }}</td>
                 <td class="nowrap">{{ train.cargoList[0].price }} грн</td>
@@ -607,9 +606,8 @@ readinessData.value = readiness
                 <td >{{ (cargo.from !== train.from)? cargo.from: '–' }}</td>
                 <td >{{ moment(cargo.date).format("DD.MM.YYYY") }}</td>
                 <td >{{ moment(cargo.date).format("HH:mm") }}</td>
-                <td class="smaller">{{ cargo.points.slice(1, cargo.points.length -1).join(', ') }}</td>
-                <td >{{ (cargo.from === train.from)? cargo.to: '–' }}</td>
-                <td >{{ (cargo.from !== train.from)? cargo.to: '–' }}</td>
+                <td>{{ cargo.points.slice(1, cargo.points.length -1).join(', ') }}</td>
+                <td >{{ cargo.to }}</td>
                 <td >{{ moment(cargo.finishDateTotal).format("DD.MM.YYYY") }}</td>
                 <td >{{ moment(cargo.finishDateTotal).format("HH:mm") }}</td>
                 <td class="nowrap">{{ cargo.price }} грн</td>
