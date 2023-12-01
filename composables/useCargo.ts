@@ -146,18 +146,26 @@ export const useCargo = () => {
       group.points = _union(group.points, cargo.points)
     }
 
-    group.pointDitales = group.points.map((point) => {
+    group.dists = way.dists.slice(group.fromIndex, group.toIndex)
+
+    let pointIndex = 1
+    group.pointDitales = group.dists.map((dist) => {
+      const point = group.points[pointIndex]
+
       const thisPointCargo = group.cargoList.filter((cargo) => {
-        return cargo.points.includes(point)
+        const findIndex = cargo.points.indexOf(point)
+        return findIndex !== -1 && findIndex !== 0
       })
+
+      pointIndex += 1
 
       return {
         point: point,
+        dist: dist,
         count: thisPointCargo.length
       }
     })
-    
-    group.dists = way.dists.slice(group.fromIndex, group.toIndex)
+
 
     group.distance = way.dists.slice(group.fromIndex, group.toIndex).reduce((a,b) => {
       return a + b
@@ -225,14 +233,14 @@ export const useCargo = () => {
         continue
   
       // 2) CHECK PURE TOTAL POTENTIAL DISTANCE
-      let potentialDistance = way.dists.slice(newGroup.fromIndex, cargo.toIndex).reduce((a,b) => {
-        return a + b
-      }, 0)
+      // let potentialDistance = way.dists.slice(newGroup.fromIndex, cargo.toIndex).reduce((a,b) => {
+      //   return a + b
+      // }, 0)
   
       // Skip if new potential distance more then allowed
-      if(potentialDistance > setup.limits.distance){
-        continue
-      }
+      // if(potentialDistance > setup.limits.distance){
+      //   continue
+      // }
   
       // 3) CHECK VAGONS AMOUNT LIMIT
       let vagonsAmount = newGroup.cargoList.reduce((prev, curr) => {
@@ -261,7 +269,6 @@ export const useCargo = () => {
   
       const stopsMinutes = totalStopsToArrive * setup.limits.connectionMinutes
   
-  
       const distanceToArrive = way.dists.slice(newGroup.fromIndex, cargo.fromIndex).reduce((a,b) => {
         return a + b
       }, 0)
@@ -278,6 +285,27 @@ export const useCargo = () => {
       }
   
       // ADD CONNECT / DISCONNECT spend time
+
+      const totalStopsToArrive2 = newGroup.cargoList.reduce((total, curr) => {
+        if(curr.from < cargo.from) {
+          return total + curr.stops
+        }else {
+          return total
+        }
+      }, 1)
+  
+      const stopsMinutes2 = totalStopsToArrive2 * setup.limits.connectionMinutes
+
+      let largestIndex = cargo.toIndex > newGroup.toIndex? cargo.toIndex: newGroup.toIndex
+      let potentialDistance = way.dists.slice(newGroup.fromIndex, largestIndex).reduce((a,b) => {
+        return a + b
+      }, 0)
+  
+      const potentialMinutes = 60 * potentialDistance / setup.v
+      const potentialMinutesFull = potentialMinutes + stopsMinutes2
+
+      if(potentialMinutesFull > setup.limits.minutes)
+        continue
   
       // 5) CHECK GARGO SPEED
       const stopLimits = newGroup.cargoList.find((item) => {
