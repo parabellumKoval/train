@@ -22,6 +22,11 @@ const loading = ref({
   progress: 0
 })
 
+const loadingMultiple = ref({
+  active: false,
+  step: 30
+})
+
 const settings = ref({
   step: 15,
   trains: 20,
@@ -32,6 +37,7 @@ const settings = ref({
 const tableSteps = ref(15)
 const isCostTable = ref(false)
 const trains = ref([])
+const trainsMultiple = ref({})
 // Table of readiness (cargo)
 const readinessData = ref([])
 // Selected (clicked) readiness data row
@@ -46,6 +52,9 @@ const setup = {
   e: 371.8066,
   v: 50,
   limits: {
+    // How long train can wain before arrive
+    startDelayMinutes: 0,
+    //
     connectionMinutes: 30,
     // How mach cargo can wait
     delayMinutes: 2 * 60,
@@ -83,6 +92,8 @@ const readinessSorted = computed(() => {
   return readinessSortedByDateTime.value
 })
 
+
+// Calculate price for cargo
 const priceCalc = (cargo, group) => {
   let distsJoinsSum = 0
      
@@ -108,6 +119,31 @@ const priceCalc = (cargo, group) => {
   return Math.round(price)
 }
 
+// Calc price for whole train
+const priceTrainCalc = (train) => {
+  const startVagons = train.cargoList.filter((item) => {
+    if(item.from === train.from)
+      return true
+    else
+      return false
+  }).reduce((common, item) => {
+    return common + item.vagons
+  }, 0)
+
+  const connectionVagons = train.cargoList.filter((item) => {
+    if(item.from !== train.from)
+      return true
+    else
+      return false
+  }).reduce((common, item) => {
+    return common + item.vagons
+  }, 0)
+
+  const price = (561.3 + 466.1 + 466.1) * (startVagons + connectionVagons) + 371.8 * train.distance + 39.4 * (startVagons + connectionVagons)
+  return price
+} 
+
+// Set unique trains
 const setTrains = async () => {
 
   const uniqueTrains = []
@@ -127,7 +163,7 @@ const setTrains = async () => {
 
   var start = performance.now();
   const sortedCargoGroups = cargoGroups.value.sort((a, b) => {
-    if(a.uniques > b.uniques) {
+    if(a.uniques + a.cargoList.length > b.uniques + b.cargoList.length) {
       return -1
     }else {
       return 1
@@ -159,12 +195,12 @@ const setTrains = async () => {
 
   var end = performance.now();
   var time = end - start
-  console.log('Performance', time)
+  // console.log('Performance', time)
 
   // Fill Empty values
   for (const [key, value] of Object.entries(uidsObject)) {
     if(value.count === 0) {
-      console.log('0 variations', value)
+      // console.log('Fill Empty values')
       await useWay().getVariants(value.item.from, value.item.to).then((data) => {
         data.sort((a,b) => {
           if(a.distance > b.distance)
@@ -179,6 +215,31 @@ const setTrains = async () => {
     }
   }
 
+  // Replace one-cargo-train to shortest way
+  for(let j = 0; j < uniqueTrains.length; j++) {
+    if(uniqueTrains[j].cargoList.length === 1) {
+      await useWay().getVariants(uniqueTrains[j].from, uniqueTrains[j].to).then((data) => {
+        data.sort((a,b) => {
+          if(a.distance > b.distance)
+            return 1
+          else
+            return -1
+        })
+
+        console.log('cargo', data[0])
+        //uniqueTrains[j].readiness
+        const cargo = getCargoGroup(data[0], {
+          vagons: uniqueTrains[j].cargoList[0].vagons,
+          date: uniqueTrains[j].fromDate,
+          from: uniqueTrains[j].from,
+          to: uniqueTrains[j].to,
+        })
+        uniqueTrains[j] = cargo
+      })
+    }
+  }
+
+
 
   // Price calculation
   for(let t = 0; t < uniqueTrains.length; t++) {
@@ -192,7 +253,6 @@ const setTrains = async () => {
   }
 
   uniqueTrains.sort((a,b) => {
-
     if(moment(a.fromDate).diff(moment(b.fromDate), 'm') > 0){
       return 1
     }else {
@@ -206,6 +266,132 @@ const setTrains = async () => {
   trains.value = uniqueTrains
 }
 
+// Set multiple unique trains
+const setMultipleTrains = (stopTime) => {
+  const uniqueTrains = {}
+
+  // Sort trains by unique numbers of cargo
+  const sortedCargoGroups = cargoGroups.value.sort((a, b) => {
+    if(a.uniques > b.uniques) {
+      return -1
+    }else {
+      return 1
+    }
+  })
+
+  for(let i = 0; i < sortedCargoGroups.length; i++) {
+    // train is id of first cargo
+    const thisTrainId = sortedCargoGroups[i].from + '-' + moment(sortedCargoGroups[i].fromDate).unix()
+
+    // const thisTrainId = sortedCargoGroups[i].uids[0]
+
+    // const thisTrainId = sortedCargoGroups[i].cargoList.reduce((carry, item) => {
+    //   if(item.from === sortedCargoGroups[i].from) {
+    //     if(carry === '') {
+    //       return item.uid
+    //     }else {
+    //       return carry + '-' + item.uid
+    //     }
+    //   }else {
+    //     return carry
+    //   }
+    // }, '')
+
+    console.log('thisTrainId', thisTrainId)
+    
+    // train stops amount
+    const thisStops = sortedCargoGroups[i].uniques - 1
+
+    // train common travel minutes
+    const thisMinutes = sortedCargoGroups[i].minutes
+    
+    // find simular item
+    if(uniqueTrains[thisTrainId] && uniqueTrains[thisTrainId][thisStops]) {
+      const simular = uniqueTrains[thisTrainId][thisStops].find((item) => {
+        if(item.distance === sortedCargoGroups[i].distance &&
+            item.from === sortedCargoGroups[i].from &&
+              item.to === sortedCargoGroups[i].to) {
+                return true
+              }
+      })
+
+      if(simular !== -1 && simular !== undefined)
+        continue
+    }
+
+    // skip if already more then 8 trains or fill if this train has shorter distance
+    if(uniqueTrains[thisTrainId] && uniqueTrains[thisTrainId][thisStops] && 
+          uniqueTrains[thisTrainId][thisStops].length >= 8) 
+    {
+      // find longest train
+      const longerTrainIndex = uniqueTrains[thisTrainId][thisStops].findIndex((t) => {
+        if(t.minutes > thisMinutes)
+          return true
+        else
+          return false
+      })
+
+      if(longerTrainIndex !== -1) {
+        uniqueTrains[thisTrainId][thisStops][longerTrainIndex] = sortedCargoGroups[i]
+      }
+
+      continue
+    }
+
+    // create base object if new
+    if(uniqueTrains[thisTrainId] === undefined) {
+      uniqueTrains[thisTrainId] = {}
+    }
+
+    // create base if [this-train][stops-amount] not existas
+    if(uniqueTrains[thisTrainId][thisStops] === undefined) {
+      uniqueTrains[thisTrainId][thisStops] = []
+    }
+    
+    // push train
+    uniqueTrains[thisTrainId][thisStops].push(sortedCargoGroups[i])
+    
+  }
+
+  // Price calculation
+
+  // for each group
+  for(let g = 0; g < Object.keys(uniqueTrains).length; g++) {
+    const trainUids = Object.keys(uniqueTrains)
+    const key = trainUids[g]
+
+    // for each stops
+    for(let s = 0; s < Object.keys(uniqueTrains[key]).length; s++) {
+      
+      // train
+      for(let t = 0; t < uniqueTrains[key][s].length; t++) {
+        
+        const train = uniqueTrains[key][s][t]
+
+        const price = priceTrainCalc(train)
+        uniqueTrains[key][s][t].price = price
+      }
+
+      // Sorting by price
+      uniqueTrains[key][s].sort((a, b) => {
+        if(a.price > b.price)
+          return 1
+        else
+          return -1
+      })
+
+    }
+  }
+
+  console.log('uniqueTrains', uniqueTrains)
+
+  trainsMultiple.value[stopTime] = {}
+  trainsMultiple.value[stopTime] = uniqueTrains
+
+  loadingMultiple.value.active = false
+}
+
+
 
 
 // METHODS 
@@ -217,7 +403,7 @@ const findSimilarCargo = (list, cargo) => {
   })
 }
 
-const filterWays = async (allWays) => {
+const filterWays = async (allWays, setups) => {
   const redinessLength = readinessSorted.value.length
   const variationsForCargo = {}
 
@@ -244,7 +430,7 @@ const filterWays = async (allWays) => {
         const minutes = 60 * distance / 50
 
         // CHECK BASE 24 HOURS LIMIT
-        if(distance <= setup.limits.distance) {
+        if(distance <= setups.limits.distance) {
 
           const cargo = {
             ...readinessSorted.value[i],
@@ -302,16 +488,14 @@ const filterWays = async (allWays) => {
   var time = end - start;
   // console.log('all ways', allWays)
   // console.log('filterred ways', ways.value)
-  console.log('variationsForCargo', variationsForCargo)
+  // console.log('variationsForCargo', variationsForCargo)
 
   console.log('Performance', time)
 
   // Join cargo to train
-  await useCargo().createTrains(ways.value).then((data) => {
-    console.log('FROM COMSABLES', data)
+  return await useCargo().createTrains(ways.value, setups).then((data) => {
     cargoGroups.value = data
-
-    setTrains()
+    return data
   })
 
   // createTrains()
@@ -320,7 +504,7 @@ const filterWays = async (allWays) => {
   // console.log('cargoGroups', cargoGroups.value, trains.value)
 }
 
-const getWays = async () => {
+const getWays = async (settings) => {
 
   const promise1 = await useWay().getVariants('A1', 'A25').then((data) => {
     return data
@@ -330,7 +514,7 @@ const getWays = async () => {
     return data
   })
 
-  Promise.all([promise1, promise2]).then((values) => {
+  return Promise.all([promise1, promise2]).then(async (values) => {
     const allData = [...values[0], ...values[1]]
     
     // Longest ways first
@@ -342,18 +526,71 @@ const getWays = async () => {
     })
 
     // Calc available trains
-    filterWays(allData)
-    // console.log('worker', worker)
+    return await filterWays(allData, settings).then((data) => {
+      return data
+    })
   });
 
 }
 
-const calcHandler = async () => {
+const getTotalRows = (data) => {
+  if(!data) {
+    return 1
+  }
+  
+  const total = {
+    rows: 1
+  }
 
+  Object.values(data).forEach((step) => {
+    total.rows += 1
+
+    Object.values(step).forEach((stop) => {
+      total.rows += 1
+    })
+  })
+
+  return total.rows
+}
+
+const calcMultipleHandler = async (stopMinutes = null) => {
+  loadingMultiple.value.active = true
+
+  let iterations = steps.value
+  
+  if(stopMinutes){
+    iterations = []
+    iterations.push(stopMinutes)
+  }
+
+  for(let i = 0; i < iterations.length; i++){
+    const settings = JSON.parse(JSON.stringify(setup))
+
+    settings.limits.delayMinutes = iterations[i]
+    settings.limits.startDelayMinutes = iterations[i]
+    loadingMultiple.value.step = iterations[i]
+
+    // console.log('delayMinutes', settings.limits.delayMinutes)
+
+    setTimeout(async () => {
+      await getWays(settings).then((data) => {
+        setMultipleTrains(settings.limits.delayMinutes)
+      })
+    }, 100)
+  }
+}
+
+const calcHandler = async () => {
   loading.value.active = true
 
-  setTimeout(() => {
-    getWays()
+  const settings = JSON.parse(JSON.stringify(setup))
+  settings.limits.delayMinutes = 2 * 60
+  settings.limits.startDelayMinutes = 0
+
+  setTimeout(async () => {
+    await getWays(settings).then((data) => {
+      setTrains()
+    })
   }, 100)
 }
 
@@ -363,13 +600,14 @@ const getCargoGroup = (newCargo, readiness) => {
 
   const cargo = {
     ...readiness, // uid, date, speed, vagons, from, to
-    ...newCargo, //distance, points, dists
+    ...newCargo, // distance, points, dists
     finishDate: moment(readiness.date).add(minutes, 'm').format("YYYY-MM-DDTHH:mm"),
     finishDateTotal: moment(readiness.date).add(minutes, 'm').format("YYYY-MM-DDTHH:mm"),
     minutes: minutes,
     minutesTotal: minutes,
     stops: 0,
-    stopPoints: []
+    stopPoints: [],
+    readiness: readiness
   }
 
   const cargoGroup = {
@@ -424,9 +662,9 @@ const selectSpeedHandler = (index, speed) => {
   readinessData.value[index].speed = speed
 }
 
-const applySteps = () => {
-  settings.value.step = tableSteps.value
-}
+// const applySteps = () => {
+//   settings.value.step = tableSteps.value
+// }
 
 const showCostTable = () => {
   isCostTable.value = !isCostTable.value
@@ -604,8 +842,8 @@ readinessData.value = readiness
                 :class="{last: train.cargoList.length - 2 === cargoIndex}"
               >
                 <td >{{ (cargo.from !== train.from)? cargo.from: '–' }}</td>
-                <td >{{ moment(cargo.date).format("DD.MM.YYYY") }}</td>
-                <td >{{ moment(cargo.date).format("HH:mm") }}</td>
+                <td >{{ moment(cargo.dateTotal).format("DD.MM.YYYY") }}</td>
+                <td >{{ moment(cargo.dateTotal).format("HH:mm") }}</td>
                 <td>{{ cargo.points.slice(1, cargo.points.length -1).join(', ') }}</td>
                 <td >{{ cargo.to }}</td>
                 <td >{{ moment(cargo.finishDateTotal).format("DD.MM.YYYY") }}</td>
@@ -628,38 +866,91 @@ readinessData.value = readiness
 
         </div>
 
-        <div v-if="!loading.active && trains.length > 0" class="mt-5">
-          <button @click="showCostTable" type="button" class="btn btn-lg btn-light d-flex align-items-center">
+        <!-- Multiple trains -->
+
+        <!-- !!! -->
+
+        <div class="mt-5">
+
+          <h5 class="mb-3 d-flex">
+            <IconCSS name="ph:calculator" size="20" class="me-1"></IconCSS>
+            {{ t('label.pay') }}
+          </h5>
+
+          <!-- <button @click="showCostTable" type="button" class="btn btn-lg btn-light d-flex align-items-center">
             <IconCSS v-if="!isCostTable" name="ph:plus" size="16"></IconCSS>
             <IconCSS v-else name="ph:minus" size="16"></IconCSS>
             <span class="ps-1">{{ t('label.pay') }}</span>
-          </button>
+          </button> -->
 
-          <div v-if="isCostTable">
+          <div>
+          
             <div class="row mt-3">
-              <div class="col-sm-3">
+              <div class="col-sm-6">
                 <label for="trains" class="form-label">{{ t('form.step') }}</label>
                 <div class="d-flex">
-                  <input v-model="tableSteps" type="number" class="form-control" id="step" min="5" step="150">
-                  <button @click="applySteps" type="button" class="btn btn-primary ms-3">{{ t('btn.apply') }}</button>
+                  <input v-model="settings.step" type="number" class="form-control" id="step" min="5" step="150">
+                  <!-- <button @click="applySteps" type="button" class="btn btn-primary ms-3">{{ t('btn.apply') }}</button> -->
+                  <button @click="calcMultipleHandler()" class="btn btn-primary ms-3 text-nowrap">{{ t('btn.calc_all') }}</button>
+                  <button @click="calcMultipleHandler(30)" class="btn btn-primary ms-3 text-nowrap">{{ t('btn.calc_step') }}</button>
                 </div>
               </div>
             </div>
 
-            <table v-if="!loading.active && trains.length > 0" class="custom-table large mt-3">
-              <tr class="custom-table-header">
-                <th>Номер поїзду</th>
-                <th v-for="step in steps" :key="step">{{ step }}</th>
-              </tr>
-              <tr
-                  v-for="(train, index) in trains"
-                  :key="index"
-                  :class="{last: train.cargoList.length - 2 === cargoIndex}"
-                >
-                  <td >{{ index + 1 }}</td>
-                  <td v-for="step in steps" :key="step">-</td>
-              </tr>
-            </table>
+            <div class="mt-5">
+              <table v-if="Object.keys(trainsMultiple).length" class="custom-table large mt-3">
+                <tr class="custom-table-header">
+                  <th rowspan="2">{{ t('table.step') }}</th>
+                  <th rowspan="2">{{ t('table.uid') }}</th>
+                  <th rowspan="2">{{ t('table.stops') }}</th>
+                  <th colspan="8">{{ t('table.way') }}</th>
+                </tr>
+                <tr>
+                  <td v-for="i in 8" :key="i">{{ i }}</td>
+                </tr>
+
+                <template v-for="step in steps" :key="step">
+                  <tr>
+                    <td :rowspan="getTotalRows(trainsMultiple[step])">{{ step }}</td>
+                    <template v-if="!trainsMultiple[step]">
+                      <td colspan="10">
+                        <div v-if="loadingMultiple.active && loadingMultiple.step === step" class="d-flex justify-content-center">
+                          <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                          </div>
+                        </div>
+                        <button
+                          v-else
+                          @click="calcMultipleHandler(step)"
+                          class="btn btn-secondary">{{ t('btn.calc_data') }}</button>
+                      </td>
+                    </template>
+                  </tr>
+                  <template v-if="trainsMultiple[step]">
+                    <template v-for="(group, index) in trainsMultiple[step]" :key="index">
+                      <tr>
+                        <td :rowspan="Object.keys(group).length + 1">#{{ index }}</td>
+                      </tr>
+                      <!-- :class="{last: stopIndex === (Object.keys(group).length - 1)}" -->
+                      <!-- :class="['stop-' + stopIndex, 'group-' + Object.keys(group).length]" -->
+                      <tr clickable v-for="(stop, stopIndex) in group" :key="stopIndex" :class="{last: stopIndex == (Object.keys(group).length - 1)}">
+                        <td>{{ stopIndex }}</td>
+                        <td class="smaller" v-for="(train, index) in stop" :key="index">{{ train.price }}</td>
+                        <template v-if="stop.length < 8">
+                          <td v-for="empty in (8 - stop.length)" :key="empty">-</td>
+                        </template>
+                      </tr>
+                    </template>
+                  </template>
+                </template>
+              </table>
+              <div v-else-if="loadingMultiple.active" class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 

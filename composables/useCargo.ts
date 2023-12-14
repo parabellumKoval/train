@@ -21,8 +21,11 @@ export const useCargo = () => {
     e: 371.8066,
     v: 50,
     limits: {
+      // How long train can wain before arrive
+      startDelayMinutes: 0,
+      //
       connectionMinutes: 30,
-      // How mach cargo can wait
+      // How long cargo can wait
       delayMinutes: 2 * 60,
       // Max vagons connected to train
       vagons: 45,
@@ -40,12 +43,15 @@ export const useCargo = () => {
     })
   }
 
-  const createTrains = (ways: Array<Object>) => {
+  const createTrains = (ways: Array<Object>, settings: Object) => {
+
+    setSettings(settings)
+
     return new Promise((resolve) => {
       var start = performance.now();
       // For each ways (ways filled by function filterWays)
       for(let i = 0; i < ways.length; i++ ) {
-        console.log('progress', i)
+        // console.log('progress', i)
         
         const way = ways[i].way
         const cargoList = ways[i].cargo
@@ -67,7 +73,7 @@ export const useCargo = () => {
     
       var end = performance.now();
       var time = end - start
-      console.log('Performance', time)
+      // console.log('Performance', time)
 
       resolve(cargoGroups.value);
     })
@@ -106,7 +112,9 @@ export const useCargo = () => {
       stops: 0,
       stopPoints: [],
       minutesTotal: newCargo.minutes,
-      finishDateTotal: newCargo.finishDate,
+      // finishDateTotal: newCargo.finishDate,
+      finishDateTotal: moment(newCargo.finishDate).add(newCargo.diff + setup.limits.connectionMinutes, 'm'),
+      dateTotal: moment(newCargo.date).add(newCargo.diff + setup.limits.connectionMinutes, 'm'),
       dists: way.dists.slice(newCargo.fromIndex, newCargo.toIndex)
     }
 
@@ -134,6 +142,7 @@ export const useCargo = () => {
     group.cargoList.push(cargo)
     group.uids.push(cargo.uid)
 
+    // Points and dists
     if(cargo.fromIndex < group.fromIndex || group.fromIndex === null){
       group.from = cargo.from
       group.fromIndex = cargo.fromIndex
@@ -148,6 +157,7 @@ export const useCargo = () => {
 
     group.dists = way.dists.slice(group.fromIndex, group.toIndex)
 
+    // Point Ditales
     let pointIndex = 1
     group.pointDitales = group.dists.map((dist) => {
       const point = group.points[pointIndex]
@@ -166,11 +176,12 @@ export const useCargo = () => {
       }
     })
 
-
+    // Distance
     group.distance = way.dists.slice(group.fromIndex, group.toIndex).reduce((a,b) => {
       return a + b
     }, 0)
 
+    // Minutes
     group.minutes = 60 * group.distance / setup.v
 
     return group
@@ -277,12 +288,22 @@ export const useCargo = () => {
   
       let arriveDateTime = moment(newGroup.fromDate).add(minutesToArrive + stopsMinutes, 'm')
       let readyDateTime = moment(cargo.date)
+
+      // Разница между временем готовности груза и прибытием поезда на станцию, 
+      // положительное значение - значит поезд запаздывает, не должно превышать допустимое время ожидания setup.limits.delayMinutes
+      // отрецательное значение - значит поезд опережает график, то есть прибыл на станцию, но груз еще не готов 
       let diff = arriveDateTime.diff(readyDateTime, 'm')
+      
+      // Добавляется время, которое поезд может подождать на станции отправления
+      // Если значение меньше нуля, значит поезд идет с опережением даже с учетом времени первоначального простоя на станции отправления
+      let diffMax = diff + setup.limits.startDelayMinutes
   
-      // console.log('newGroup', newGroup, 'cargo', cargo, distanceToArrive, minutesToArrive, diff)
-      if(diff < 0 || diff > setup.limits.delayMinutes ) {
+      if((diff < 0 || diff > setup.limits.delayMinutes) && (diffMax < 0 || diffMax > setup.limits.delayMinutes)) {
         continue
       }
+      // if(diff < 0 || diff > setup.limits.delayMinutes) {
+      //   continue
+      // }
   
       // ADD CONNECT / DISCONNECT spend time
 
@@ -319,12 +340,24 @@ export const useCargo = () => {
       if(stopLimits !== undefined)
         continue
   
-      // add cargo 
-      newGroup = addCargo(newGroup, cargo, way)
+      // add cargo
+      newGroup = addCargo(newGroup, {...cargo, diff: diff}, way)
     }
   
     cargoGroups.value.push(newGroup)
         
+  }
+
+  const setSettings = (value) => {
+    const keys = Object.keys(value)
+    const values = Object.values(value)
+
+    for(let i = 0; i < keys.length; i++){
+      const key = keys[i]
+      const value = values[i]
+
+      setup[key] = value
+    }
   }
 
   return {
