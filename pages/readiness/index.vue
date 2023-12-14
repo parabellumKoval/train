@@ -383,10 +383,26 @@ const setMultipleTrains = (stopTime) => {
     }
   }
 
+
+  // Sort by alph
+  const uniqueTrainsSorted = Object.keys(uniqueTrains).sort().reduce(
+    (obj, key) => { 
+      obj[key] = uniqueTrains[key]; 
+      return obj;
+    }, 
+    {}
+  );
+
+  // uniqueTrains.sort((a, b) => {
+  //   if(a.price > b.price)
+  //     return 1
+  //   else
+  //     return -1
+  // })
   console.log('uniqueTrains', uniqueTrains)
 
   trainsMultiple.value[stopTime] = {}
-  trainsMultiple.value[stopTime] = uniqueTrains
+  trainsMultiple.value[stopTime] = uniqueTrainsSorted
 
   loadingMultiple.value.active = false
 }
@@ -873,7 +889,7 @@ readinessData.value = readiness
         <div class="mt-5">
 
           <h5 class="mb-3 d-flex">
-            <IconCSS name="ph:calculator" size="20" class="me-1"></IconCSS>
+            <IconCSS name="ph:timer" size="20" class="me-1"></IconCSS>
             {{ t('label.pay') }}
           </h5>
 
@@ -903,7 +919,7 @@ readinessData.value = readiness
                   <th rowspan="2">{{ t('table.step') }}</th>
                   <th rowspan="2">{{ t('table.uid') }}</th>
                   <th rowspan="2">{{ t('table.stops') }}</th>
-                  <th colspan="8">{{ t('table.way') }}</th>
+                  <th colspan="8">{{ t('table.way_price') }}</th>
                 </tr>
                 <tr>
                   <td v-for="i in 8" :key="i">{{ i }}</td>
