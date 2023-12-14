@@ -943,9 +943,9 @@ readinessData.value = readiness
                     </template>
                   </tr>
                   <template v-if="trainsMultiple[step]">
-                    <template v-for="(group, index) in trainsMultiple[step]" :key="index">
+                    <template v-for="(group, index, loopIndex) in trainsMultiple[step]" :key="index">
                       <tr>
-                        <td :rowspan="Object.keys(group).length + 1">#{{ index }}</td>
+                        <td :rowspan="Object.keys(group).length + 1">#{{ loopIndex + 1 }}</td>
                       </tr>
                       <!-- :class="{last: stopIndex === (Object.keys(group).length - 1)}" -->
                       <!-- :class="['stop-' + stopIndex, 'group-' + Object.keys(group).length]" -->
