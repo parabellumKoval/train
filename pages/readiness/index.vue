@@ -139,8 +139,22 @@ const priceTrainCalc = (train) => {
     return common + item.vagons
   }, 0)
 
-  const price = (561.3 + 466.1 + 466.1) * (startVagons + connectionVagons) + 371.8 * train.distance + 39.4 * (startVagons + connectionVagons)
-  return price
+  const disconnectionVagons = train.cargoList.filter((item) => {
+    if(item.to !== train.to)
+      return true
+    else
+      return false
+  }).reduce((common, item) => {
+    return common + item.vagons
+  }, 0)
+
+  const price = (561.3 + 466.1 + 466.1) * (startVagons + connectionVagons) + 371.8 * train.distance + 39.4 * (disconnectionVagons + connectionVagons)
+  return {
+    price: price,
+    startVagons: startVagons,
+    connectionVagons: connectionVagons,
+    disconnectionVagons: disconnectionVagons
+  }
 } 
 
 // Set unique trains
@@ -368,8 +382,11 @@ const setMultipleTrains = (stopTime) => {
         
         const train = uniqueTrains[key][s][t]
 
-        const price = priceTrainCalc(train)
+        const {price, startVagons, connectionVagons, disconnectionVagons} = priceTrainCalc(train)
         uniqueTrains[key][s][t].price = price
+        uniqueTrains[key][s][t].startVagons = startVagons
+        uniqueTrains[key][s][t].connectionVagons = connectionVagons
+        uniqueTrains[key][s][t].disconnectionVagons = disconnectionVagons
       }
 
       // Sorting by price
@@ -399,7 +416,7 @@ const setMultipleTrains = (stopTime) => {
   //   else
   //     return -1
   // })
-  console.log('uniqueTrains', uniqueTrains)
+  // console.log('uniqueTrains', uniqueTrains)
 
   trainsMultiple.value[stopTime] = {}
   trainsMultiple.value[stopTime] = uniqueTrainsSorted
@@ -913,15 +930,21 @@ readinessData.value = readiness
               </div>
             </div>
 
-            <div class="mt-5">
+            <div class="mt-5 table-overflow">
               <table v-if="Object.keys(trainsMultiple).length" class="custom-table large mt-3">
                 <tr class="custom-table-header">
                   <th rowspan="2">{{ t('table.step') }}</th>
                   <th rowspan="2">{{ t('table.uid') }}</th>
                   <th rowspan="2">{{ t('table.stops') }}</th>
                   <th colspan="8">{{ t('table.way_price') }}</th>
+                  <th rowspan="2">n ст.відпр</th>
+                  <th rowspan="2">n відч</th>
+                  <th rowspan="2">n прич</th>
+                  <th colspan="8">St</th>
                 </tr>
                 <tr>
+                  <td v-for="i in 8" :key="i">{{ i }}</td>
+                  <!-- ST -->
                   <td v-for="i in 8" :key="i">{{ i }}</td>
                 </tr>
 
@@ -944,18 +967,30 @@ readinessData.value = readiness
                   </tr>
                   <template v-if="trainsMultiple[step]">
                     <template v-for="(group, index, loopIndex) in trainsMultiple[step]" :key="index">
+                      <!-- Номер поезда -->
                       <tr>
                         <td :rowspan="Object.keys(group).length + 1">#{{ loopIndex + 1 }}</td>
                       </tr>
                       <!-- :class="{last: stopIndex === (Object.keys(group).length - 1)}" -->
                       <!-- :class="['stop-' + stopIndex, 'group-' + Object.keys(group).length]" -->
                       <tr clickable v-for="(stop, stopIndex) in group" :key="stopIndex" :class="{last: stopIndex == (Object.keys(group).length - 1)}">
+                        <!-- Кол-во остановок -->
                         <td>{{ stopIndex }}</td>
+                        <!-- Цена (8 вариантов) -->
                         <td class="smaller" v-for="(train, index) in stop" :key="index">{{ train.price }}</td>
                         <template v-if="stop.length < 8">
                           <td v-for="empty in (8 - stop.length)" :key="empty">-</td>
                         </template>
+                        <td>{{ stop[0].startVagons }}</td>
+                        <td>{{ stop[0].disconnectionVagons }}</td>
+                        <td>{{ stop[0].connectionVagons }}</td>
+                        <!-- 8 расстояний -->
+                        <td class="smaller" v-for="(train, index) in stop" :key="index">{{ train.distance }}</td>
+                        <template v-if="stop.length < 8">
+                          <td v-for="empty in (8 - stop.length)" :key="empty">-</td>
+                        </template>
                       </tr>
+
                     </template>
                   </template>
                 </template>
