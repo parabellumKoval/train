@@ -747,10 +747,10 @@ readinessData.value = readiness
         
         <!-- INPUTS -->
         <div class="col-sm-12">
-          <h5 class="mb-3 d-flex">
+          <!-- <h5 class="mb-3 d-flex">
             <IconCSS name="ph:database" size="20" class="me-1"></IconCSS>
             {{ t('label.inputs') }}
-          </h5>
+          </h5> -->
 
           <div class="row">
             <div class="col-sm-2 mb-3">
