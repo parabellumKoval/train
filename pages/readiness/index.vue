@@ -752,7 +752,7 @@ readinessData.value = readiness
             {{ t('label.inputs') }}
           </h5> -->
 
-          <div class="row">
+          <div class="row text-center">
             <div class="col-sm-2 mb-3">
               <label for="date" class="form-label">{{ t('form.date') }}</label>
             </div>
